@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+ 		"-//mybatis.org//DTD Mapper 3.0//EN" 
+ 		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 		
+ <mapper namespace="com.wmc.board.BoardDAO">
+ 	<!-- 총 게시글 개수 조회 -->
+ 	<!-- 카테고리별, 검색별로도 페이지 처리하기 위해서 selectList 쿼리문을 먼저 실행해준다.
+ 		실제 페이지 처리 sql 구문은 selectList에 작성한다. -->
+ 	<select id="selectBoardCount"
+ 	 parameterType="hashmap" 
+ 	 resultType="int">
+ 	
+ 		select count(*) from board5
+ 		<where>
+ 			<if test="category != null and '' != category">
+ 				category = #{category} and
+ 			</if>
+ 			<if test="column != null and '' != column">
+ 				${column} like '%${search}%' and
+ 			</if>
+ 				deleted != 'y'
+ 		</where>
+ 	</select>
+ 	<!-- 게시글 리스트 조회 -->
+ 	<select id="selectList" parameterType="hashmap" resultType="board">
+ 		select * from board5
+ 			<where>
+ 				<if test="category != null and category != ''">category = #{category} and </if>
+ 				<if test="column != null and column != ''">${column} like '%${search}%' and </if>
+ 				deleted != 'y'
+ 			</where>
+ 			order by idx desc
+ 			<!-- paging객체의 offset/ paging객체의 perPage에 의하여 동적 쿼리문을 실행한다. -->
+ 			offset #{paging.offset} rows
+ 			fetch next #{paging.perPage} rows only
+ 	</select>
+ 	<!-- 게시글 수정 -->
+ 	<update id="update" parameterType="board">
+ 		update board5
+ 			<set>
+ 				<if test="category != null">	category =#{category},</if>
+ 				<if test="category != null">	title =#{title},</if>
+ 				<if test="category != null">	content =#{content},</if>
+ 				<if test="uploadFile != null">	uploadFile =#{uploadFile}</if>
+ 			</set>
+ 			 	where
+ 				idx 	=	#{idx}
+ 	
+ 	</update>
+ 	<!-- 게시글 삭제 -->
+ 	<update id="delete" parameterType="board">
+ 		update board5
+ 		set deleted = 'y'
+ 		where idx=#{idx}
+ 	</update>
+
+</mapper>
